@@ -20,6 +20,6 @@ jobs:
           script: |
             cd /home/ubuntu/trend-scope-server
             git pull origin main
-            source /path/to/venv/bin/activate
+            source /venv/bin/activate
             pip install -r requirements.txt
             sudo systemctl restart uwsgi
