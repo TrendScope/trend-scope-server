@@ -19,7 +19,7 @@ jobs:
           port: 22
           script: |
             cd /home/ubuntu/trend-scope-server
-            git pull
+            git pull origin main
             source /path/to/venv/bin/activate
             pip install -r requirements.txt
             sudo systemctl restart uwsgi
