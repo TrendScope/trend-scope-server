@@ -1,3 +1,4 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
@@ -32,10 +33,12 @@ class UserManager(BaseUserManager):
         return self.create_user(userid, password, **extra_fields)
 
 
-class User(AbstractBaseUser):
+class User(AbstractUser):
     id = models.AutoField(primary_key=True)
-    userid = models.CharField(max_length=20, unique=True)
+    username = models.CharField(max_length=20, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10, default='ACTIVE')
-    USERNAME_FIELD = 'userid'
+    USERNAME_FIELD = 'username'
+
+    objects = UserManager()

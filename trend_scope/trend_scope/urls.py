@@ -21,5 +21,6 @@ from issues.views import get_categories
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/issues/categories', get_categories, name='get_categories')
+    path('api/v1/issues/categories', get_categories, name='get_categories'),
+    path('api/v1/auth/', include('accounts.urls')),
 ]
