@@ -177,7 +177,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://3.34.211.27:3000",
     "http://3.34.211.27:5173",
-    "https://www.trend-scope.site"
+    "https://www.trend-scope.site",
+    "https://trend-scope.site"
 ]
 
 
