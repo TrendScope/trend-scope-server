@@ -18,17 +18,23 @@ class Category(models.Model):
 
 class SearchWordCategory(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    search_word = models.ForeignKey(SearchWord, on_delete=models.CASCADE)
+    search_word = models.ForeignKey(SearchWord, on_delete=models.CASCADE, related_name='search_word_categories')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 class IssueResult(models.Model):
     id = models.AutoField(primary_key=True)
-    search_word = models.ForeignKey(SearchWord, on_delete=models.CASCADE)
+    search_word = models.ForeignKey(SearchWord, on_delete=models.CASCADE, related_name='issue_results')
     issue_subject = models.CharField(max_length=100)
-    issue_keyword = models.CharField(max_length=20)
     avg_increase_rate = models.IntegerField(default=0)
     increase_factor = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class IssueKeyword(models.Model):
+    id = models.AutoField(primary_key=True)
+    search_word = models.ForeignKey(SearchWord, on_delete=models.CASCADE, related_name='issue_keywords')
+    issue_keyword = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
