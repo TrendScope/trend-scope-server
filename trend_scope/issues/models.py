@@ -25,7 +25,7 @@ class SearchWordCategory(models.Model):
 
 class IssueResult(models.Model):
     id = models.AutoField(primary_key=True)
-    search_word = models.ForeignKey(SearchWord, on_delete=models.CASCADE, related_name='issue_results')
+    search_word = models.OneToOneField(SearchWord, on_delete=models.CASCADE, related_name='issue_result')
     issue_subject = models.CharField(max_length=100)
     avg_increase_rate = models.IntegerField(default=0)
     increase_factor = models.IntegerField(default=0)
