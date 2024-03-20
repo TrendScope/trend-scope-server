@@ -1,6 +1,7 @@
 from openai import OpenAI
 import scopuscaller as sc
 import os
+import re
 from langchain_openai import OpenAIEmbeddings
 from langchain.vectorstores import DocArrayInMemorySearch
 from langchain.chat_models import ChatOpenAI
@@ -9,8 +10,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from bertopic import BERTopic
 
-from trend_scope.trend_scope.settings import BASE_DIR
-from trend_scope.trend_scope.settings import env
+from trend_scope.settings import BASE_DIR, env
 
 csv_directory = os.path.join(BASE_DIR, 'issues')
 api_key = env('SCOPOS_KEY')
@@ -50,7 +50,8 @@ def bertopic_analysis(df):
     # top_n_words.to_csv(os.path.join(csv_directory, 'bertopic_result.csv'), index=False)
 
 
-def rag_analysis(text, keywords):
+def rag_analysis(text, keywords, categories):
+    global theme
     vectorstore = DocArrayInMemorySearch.from_texts(
         [text],
         embedding=OpenAIEmbeddings(openai_api_key=openai_api_key))
@@ -79,13 +80,28 @@ def rag_analysis(text, keywords):
     chain = setup_and_retrieval | prompt | model | output_parser
 
     result = chain.invoke(
-        str(keywords) +
-        ", 지금 키워드 리스트를 전달했는데 이 키워드를 바탕으로 2024년에 유행할 이머징 이슈 키워드랑 주제 알려줘. 키워드끼리 리스트, 주제끼리 리스트에 담아서 최종적으로 결과 리스트를 만들어 전달해줘.")
-    return result
+        str(keywords) + "라는 키워드와 "+ str(categories) +"라는 카테고리 리스트가 있는데, 이 키워드와 카테고리 리스트를 바탕으로 2024년에 유행할 이머징 이슈 키워드랑 주제 알려줘. 여러개의 키워드를 담는 리스트는 keyword 변수에, 주제는 하나만 theme 변수에 한국어로 만들어 전달해줘."
+        "keyword랑 theme 변수만 제시해줘.")
+
+    keyword_match = re.search(r"keyword:\s*(.*?)\s*\n", result)
+    if keyword_match:
+        keyword_str = keyword_match.group(1)
+        keywords = [keyword.strip() for keyword in keyword_str.split(",")]
+
+    # theme 추출
+    theme_match = re.search(r"theme:\s*(.*)", result)
+    theme = theme_match.group(1).strip()
+
+    # 결과 출력
+    print("Keywords:", keywords)
+    print("Theme:", theme)
+    return keywords, theme
 
 
-def create_issues(keywords):
-    df = sc.get_titles(api_key, keywords, 2023)
+def create_issues(keyword, categories):
+    print(keyword)
+    print(categories)
+    df = sc.get_titles(api_key, keyword, 2023)
     df = sc.get_abstracts(df)
 
     # 전처리
@@ -95,5 +111,5 @@ def create_issues(keywords):
     keywords = bertopic_analysis(df)
 
     # RAG 분석
-    rag_result = rag_analysis(df['abstract'].iloc[0], keywords)
-    print(rag_result)
+    keywords, theme = rag_analysis(df['abstract'].iloc[0], keywords, categories)
+    return keywords, theme
