@@ -1,4 +1,4 @@
-from issues.models import Category, SearchWordCategory, IssueResult, SearchWord
+from issues.models import Category, SearchWordCategory, IssueResult, SearchWord, IssueKeyword
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
@@ -53,3 +53,24 @@ class AllHistorySerializer(serializers.ModelSerializer):
         search_word = obj.search_word
         serializer = SearchWordCategorySerializer(search_word.search_word_categories, many=True, read_only=True)
         return serializer.data
+
+class EmergingIssueResultSerializer(serializers.ModelSerializer):
+    issue_result_subject = SerializerMethodField(method_name='get_issue_result_subject')
+    issue_result_keywords = SerializerMethodField(method_name='get_issue_result_keywords')
+
+    class Meta:
+        model = IssueResult
+        fields = ['issue_result_subject', 'issue_result_keywords', 'avg_increase_rate', 'increase_factor']
+
+    def get_issue_result_subject(self, obj):
+        return obj.issue_subject
+
+    def get_issue_result_keywords(self, obj):
+        search_word = obj.search_word
+        serializer = IssueKeywordSerializer(search_word.issue_keywords, many=True, read_only=True)
+        return serializer.data
+
+class IssueKeywordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IssueKeyword
+        fields = ['id', 'issue_keyword']
